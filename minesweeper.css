@@ -1,0 +1,113 @@
+body {
+    background-color: #1b1d20;
+
+    .retro-text {
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+    font-weight: bold;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;  
+}
+
+
+#board {
+    width: 400px;
+    height: 400px;
+    margin: 0 auto;
+    display: flex; /* makes the board felxible for the cells/tiles to align in row or columnn" */
+    flex-wrap: wrap;
+
+}
+
+#board div {
+    width: 48px;
+    height: 48px;
+    /*border: 1px solid whitesmoke;*/
+    background-image: url('Assets/default.png');
+    background-size: cover;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tile-clicked {
+    background-color: darkgrey;
+}
+
+.x1 {
+    color: blue;
+}
+
+.x2 {
+    color: green;
+}
+
+.x3 {
+    color: red;
+}
+
+.x4 {
+    color: navy;
+}
+
+.x5 {
+    color: brown;
+}
+
+.x6 {
+    color: teal;
+}
+
+.x7 {
+    color: black;
+}
+
+.x8 {
+    color: gray;
+}
+
+.mine {
+    background-image: url('Assets/mine.png');
+    background-size: cover;
+}
+
+#control-bar {
+    width: 200px;
+    margin: 10px auto;
+    display: flex;
+    justify-content: space-between;
+    border: 2px solid black;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3); /* Drop shadow */
+    position: relative;
+}
+
+/* Vertical line in the center */
+#control-bar::before {
+    content: "";
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    left: 50%;
+    width: 2px;
+    background-color: black;
+    transform: translateX(-50%);
+}
+#restart-button {
+    width: 100px;
+    height: 50px;
+    font-size: 30px;
+    background-color: #1b1d20;
+    border: none;
+    cursor: pointer;
+}
+
+#flag-button {
+    width: 100px;
+    height: 50px;
+    font-size: 30px;
+    background-color: #1b1d20;
+    border: none;
+}
+
