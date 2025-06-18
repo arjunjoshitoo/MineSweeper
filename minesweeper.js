@@ -79,6 +79,7 @@ function clickTile() {
     }
 
     let tile = this;
+
     if (flagEnabled) {
         if (tile.innerText == "") {
             tile.innerText = "🚩";
@@ -110,7 +111,8 @@ function revealMines() {
             let tile = board[r][c];
             if (minesLocation.includes(tile.id)) {
                 tile.innerText = "💣";
-                tile.style.backgroundColor = "red";                
+                tile.style.backgroundColor = "red";  
+                tile.style.backgroundImage = "none";              
             }
         }
     }

@@ -30,10 +30,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px solid gray;
 }
 
-.tile-clicked {
-    background-color: darkgrey;
+#board div.tile-clicked {
+    background-image: none;
+    background-color: #1b1d20;
 }
 
 .x1 {
@@ -68,10 +70,6 @@ body {
     color: gray;
 }
 
-.mine {
-    background-image: url('Assets/mine.png');
-    background-size: cover;
-}
 
 #control-bar {
     width: 200px;
