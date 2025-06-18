@@ -1,8 +1,10 @@
 let board = [];
 let rows = 8;
 let columns = 8;
+let timerInterval;
+let secondsPassed = 0; //for timer
 
-let minesCount = 10;
+let minesCount = 8;
 let minesLocation = []; // "2-2", "3-4", "2-1"
 
 let tilesClicked = 0; //goal to click all tiles except the ones containing mines
@@ -13,9 +15,33 @@ let gameOver = false;
 window.onload = function(){
     startGame();
     document.getElementById("restart-button").addEventListener("click", () => {
+        document.getElementById("restart-button").innerText = "🙂";
         location.reload();
     });
 }
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if (gameOver) return;
+
+        secondsPassed++;
+        updateTimerDisplay(secondsPassed);
+    }, 1000);
+}
+
+function updateTimerDisplay(seconds) {
+    const digits = String(seconds).padStart(3, "0").split(""); // e.g., "007"
+    const timerEl = document.getElementById("timer");
+    timerEl.innerHTML = ""; // Clear old digits
+
+    digits.forEach(d => {
+        const digit = document.createElement("div");
+        digit.classList.add("timer-digit");
+        digit.style.backgroundImage = `url('Assets/${d}.png')`;
+        timerEl.appendChild(digit);
+    });
+}
+
 
 function setMines() {
     // minesLocation.push("2-2");
@@ -45,6 +71,9 @@ function startGame() {
     document.getElementById("flag-button").addEventListener("click", setFlag);
     setMines();
 
+    updateTimerDisplay(0);
+
+
     //populate our board
     for (let r = 0; r < rows; r++) {
         let row = [];
@@ -65,11 +94,11 @@ function startGame() {
 function setFlag() {
     if (flagEnabled) {
         flagEnabled = false;
-        document.getElementById("flag-button").style.backgroundColor = "lightgray";
+        document.getElementById("flag-button").style.backgroundColor = "";
     }
     else {
         flagEnabled = true;
-        document.getElementById("flag-button").style.backgroundColor = "darkgray";
+        document.getElementById("flag-button").style.backgroundColor = "black";
     }
 }
 
@@ -77,6 +106,10 @@ function clickTile() {
     if (gameOver || this.classList.contains("tile-clicked")) {
         return;
     }
+
+    if (!timerInterval) {
+    startTimer(); // ✅ only starts once, on the first click
+}
 
     let tile = this;
 
@@ -116,6 +149,9 @@ function revealMines() {
             }
         }
     }
+    clearInterval(timerInterval);
+    document.getElementById("mines-count").innerText = "Stepped!";
+    document.getElementById("restart-button").innerText = "😿";
 }
 
 function checkMine(r, c) {
