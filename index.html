@@ -3,28 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Minesweeper</title>
+  <title>Arjun's Minesweeper Classic</title>
   <link rel="stylesheet" href="minesweeper.css" />
-  <script src='minesweeper.js'></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💣</text></svg>">
 </head>
 <body>
-  <div id="header">
-    <h1>Mines: <span id="mines-count">0</span></h1> <!--used a span instead of a div as we need to style it-->
-  <div id="board-container">
-    <div id="timer"></div>
-    <div id="board"></div>
-  </div> <!--board container-->
-  </div> <!--simple block for the main board-->
-    <div id="control-bar">
-      <button id="restart-button">🙂</button>
-      <button id="flag-button">🚩</button>
-    
+  <div id="game-container">
+    <header id="main-header">
+      <h1>Minesweeper</h1>
+    </header>
+
+    <div id="difficulty-selector" class="active">
+      <h2>Select Difficulty</h2>
+      <button data-difficulty="EASY">Easy (9x9, 10 Mines)</button>
+      <button data-difficulty="MEDIUM">Medium (16x16, 40 Mines)</button>
+      <button data-difficulty="HARD">Hard (30x16, 99 Mines)</button>
     </div>
-    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet">
+
+    <div id="game-area" style="display: none;">
+      <div id="game-controls">
+        <div id="mines-count" class="game-info-box">000</div>
+        <button id="restart-button" aria-label="Reset game">🙂</button>
+        <div id="timer" class="game-info-box">000</div>
+      </div>
+      <div id="board-container">
+        <div id="board"></div>
+      </div>
+       <p class="instructions">Left-click to reveal. Right-click to flag. Click a number to chord.</p>
+       <button id="change-difficulty-button">Change Difficulty</button>
+    </div>
+
+    <div id="modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <h2 id="modal-title">Game Over!</h2>
+        <p id="modal-message">You hit a mine.</p>
+        <button id="modal-play-again">Play Again</button>
+      </div>
+    </div>
+  </div>
+  <script src='minesweeper.js'></script>
 </body>
 </html>
-
-
 
 
 

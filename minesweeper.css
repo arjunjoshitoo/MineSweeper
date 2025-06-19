@@ -1,154 +1,252 @@
+
 body {
-    background-color: #1b1d20;
-
-    .retro-text {
-      font-family: 'Pixelify Sans', sans-serif;
-    }
-    font-weight: bold;
-    text-align: center;
-    flex-direction: column;
-    align-items: center;  
-}
-
-
-#board {
-    width: 400px;
-    height: 400px;
-    margin: 0 auto;
-    display: flex; /* makes the board felxible for the cells/tiles to align in row or columnn" */
-    flex-wrap: wrap;
-
-}
-
-#board div {
-    width: 48px;
-    height: 48px;
-    /*border: 1px solid whitesmoke;*/
-    background-image: url('Assets/default.png');
-    background-size: cover;
-    font-size: 30px;
+    background-color: #1E2A3A; /* Dark slate blue */
+    font-family: 'Pixelify Sans', 'Arial', sans-serif;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    border: 1px solid gray;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #000; /* Default text color, though most text is in specific containers */
+    user-select: none;
 }
 
-#board div.tile-clicked {
-    background-image: none;
-    background-color: #1b1d20;
+#game-container {
+    background-color: #c0c0c0; /* Classic Windows grey - kept for contrast */
+    padding: 15px;
+    border: 10px outset black;
+    border-bottom-color: #808080;
+    border-right-color: #808080;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.2);
+}
+
+#main-header h1 {
+    font-size: 2em;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #000;
+}
+
+/* Difficulty Selector */
+#difficulty-selector {
+    text-align: center;
+    padding: 20px;
+    background-color: #bdbdbd;
+    border: 2px inset #808080;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    margin-bottom: 20px;
+}
+#difficulty-selector h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+#difficulty-selector button {
+    display: block;
+    width: 250px;
+    padding: 10px 15px;
+    margin: 10px auto;
+    font-size: 1em;
+    font-family: 'Pixelify Sans', 'Arial', sans-serif;
+    cursor: pointer;
+    background-color: #c0c0c0;
+    border: 2px outset #fff;
+    border-bottom-color: #808080;
+    border-right-color: #808080;
+    color: #000;
+}
+#difficulty-selector button:active {
+    border-style: inset;
+    background-color: #b0b0b0;
 }
 
 
-#header-bar {
+/* Game Area */
+#game-area {
+    /* Styles applied dynamically or if needed */
+    text-align: center; /* Center instructions and button */
+}
+
+#game-controls {
     display: flex;
     justify-content: space-between;
-    width: 400px;
-    margin: 10px auto;
-    padding: 0 10px;
-    box-sizing: border-box;
+    align-items: center;
+    background-color: #c0c0c0;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 2px inset #808080;
+    border-top-color: #fff;
+    border-left-color: #fff;
 }
 
-#timer {
-    display: flex;
-    gap: 2px;
+.game-info-box {
+    background-color: #000;
+    color: #ff0000; /* Red digital display */
+    font-family: 'Courier New', Courier, monospace; /* Digital look */
+    font-size: 1.8em;
+    padding: 3px 6px;
+    min-width: 60px;
+    text-align: center;
+    border: 1px inset #808080;
+    letter-spacing: 2px;
 }
 
-.timer-digit {
-    width: 24px;
+#restart-button {
+    font-size: 1.8em; /* Ensure emoji is large enough */
+    line-height: 1; /* Helps center emoji vertically in some browsers */
+    width: 40px;
     height: 40px;
-    background-size: cover;
-    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #c0c0c0;
+    border: 2px outset #fff;
+    border-bottom-color: #808080;
+    border-right-color: #808080;
+    padding: 0;
+}
+#restart-button:active {
+    border-style: inset;
+    background-color: #b0b0b0;
+    /* Simulate press by adjusting padding or border appearance */
+    padding-top: 1px; 
+    padding-left: 1px;
 }
 
 #board-container {
-    position: relative;
-    width: 400px;
-    margin: 0 auto;
+    padding: 5px;
+    background-color: #c0c0c0;
+    border: 2px inset #808080;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    display: inline-block; /* To wrap around the board */
+    margin-bottom: 10px; /* Space before instructions */
 }
 
-#timer {
-    position: absolute;
-    top: -50px; /* adjust as needed */
-    right: 0;
+#board {
+    display: grid;
+    gap: 0px; /* No gap for direct adjacency */
+    background-color: #808080; /* Darker grey for lines between cells if any */
+    border: 1px solid #808080; /* Outer border for the grid itself */
+}
+
+#board div.tile {
+    width: 30px;
+    height: 30px;
+    font-size: 1.2em;
+    font-weight: bold;
     display: flex;
-    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    cursor: default; /* Default cursor for cells */
+    overflow: hidden; /* Prevent content spill */
+    text-align: center; /* Center text/emoji */
 }
 
-.timer-digit {
-    width: 24px;
-    height: 40px;
-    background-size: cover;
-    background-position: center;
+/* Hidden Cell Style (Raised/Beveled) */
+#board div.tile-hidden {
+    background-color: #c0c0c0; /* Default button face color */
+    border: 2px outset #ffffff;
+    border-right-color: #808080; /* Darker shade for bottom/right */
+    border-bottom-color: #808080;
 }
-
-.x1 {
-    color: blue;
-}
-
-.x2 {
-    color: green;
-}
-
-.x3 {
-    color: red;
-}
-
-.x4 {
-    color: navy;
-}
-
-.x5 {
-    color: brown;
-}
-
-.x6 {
-    color: teal;
-}
-
-.x7 {
-    color: black;
-}
-
-.x8 {
-    color: gray;
+/* Preview style for chording or single cell press */
+#board div.tile-hidden.preview { 
+    background-color: #b0b0b0; /* Slightly darker, like it's pressed */
+    border-style: inset; /* Inset border to appear pressed */
+    border-width: 2px; /* Consistent with other borders */
+    border-top-color: #808080;
+    border-left-color: #808080;
+    border-bottom-color: #ffffff;
+    border-right-color: #ffffff;
 }
 
 
-#control-bar {
-    width: 200px;
-    margin: 10px auto;
+/* Revealed Cell Style (Inset) */
+#board div.tile-revealed {
+    background-color: #bdbdbd; /* Slightly darker than hidden */
+    border: 1px solid #808080; /* Simple inset border */
+}
+
+#board div.tile-revealed.mine-hit { /* Specifically the mine that was clicked to end the game */
+    background-color: red !important;
+    color: white; /* Make bomb icon visible if it's text */
+}
+
+/* Number Colors */
+.x1 { color: #0000ff; } /* Blue */
+.x2 { color: #008000; } /* Green */
+.x3 { color: #ff0000; } /* Red */
+.x4 { color: #000080; } /* Navy */
+.x5 { color: #800000; } /* Maroon */
+.x6 { color: #008080; } /* Teal */
+.x7 { color: #000000; } /* Black */
+.x8 { color: #808080; } /* Gray */
+
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* This will overlay on the new dark blue body */
     display: flex;
-    justify-content: space-between;
-    border: 2px solid black;
-    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3); /* Drop shadow */
-    position: relative;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 
-/* Vertical line in the center */
-#control-bar::before {
-    content: "";
-    position: absolute;
-    top: 10%;
-    bottom: 10%;
-    left: 50%;
-    width: 2px;
-    background-color: black;
-    transform: translateX(-50%);
+.modal-content {
+    background-color: #c0c0c0;
+    padding: 20px;
+    border-radius: 0; /* Classic sharp edges */
+    border: 2px outset #fff;
+    border-bottom-color: #808080;
+    border-right-color: #808080;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    text-align: center;
+    min-width: 250px;
 }
-#restart-button {
-    width: 100px;
-    height: 50px;
-    font-size: 30px;
-    background-color: #1b1d20;
-    border: none;
+
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #000;
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    font-size: 1em;
+    color: #000;
+}
+
+#modal-play-again, #change-difficulty-button {
+    padding: 10px 20px;
+    font-size: 1em;
     cursor: pointer;
+    background-color: #c0c0c0;
+    border: 2px outset #fff;
+    border-bottom-color: #808080;
+    border-right-color: #808080;
+    color: #000;
+    font-family: 'Pixelify Sans', 'Arial', sans-serif;
+    margin-top: 5px; /* Spacing for change difficulty button if instructions are short */
+}
+#modal-play-again:active, #change-difficulty-button:active {
+    border-style: inset;
+    background-color: #b0b0b0;
 }
 
-#flag-button {
-    width: 100px;
-    height: 50px;
-    font-size: 30px;
-    background-color: #1b1d20;
-    border: none;
+.instructions {
+    text-align: center;
+    font-size: 0.9em;
+    margin-top: 15px;
+    margin-bottom: 10px; /* Space before change difficulty button */
+    color: #333; /* This is on a #c0c0c0 background, so it should still be readable */
 }
-
