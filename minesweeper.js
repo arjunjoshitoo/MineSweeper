@@ -15,7 +15,6 @@ let timerInterval;
 let secondsPassed = 0;
 
 let currentDifficultySettings = null;
-let chordingPreviewActiveFor = null; // {r, c} of the cell initiating chord preview, or null
 
 // Game elements
 const boardDiv = document.getElementById("board");
@@ -47,18 +46,18 @@ window.onload = function() {
         if (currentDifficultySettings) {
             resetGame(currentDifficultySettings);
         } else {
-            handleChangeDifficulty();
+            handleChangeDifficulty(); // Go to difficulty selection if no game active
         }
     });
     modalPlayAgainButton.addEventListener("click", () => {
-        hideModal(); // Modal is no longer shown, but button interaction remains for now.
+        hideModal();
         if (currentDifficultySettings) {
             resetGame(currentDifficultySettings);
         }
     });
     changeDifficultyButton.addEventListener("click", handleChangeDifficulty);
     document.addEventListener('mouseup', handleGlobalMouseUp);
-    boardDiv.addEventListener('contextmenu', e => e.preventDefault()); // Prevent context menu on board
+    boardDiv.addEventListener('contextmenu', e => e.preventDefault());
 };
 
 function setupDifficultyButtons() {
@@ -82,12 +81,14 @@ function handleChangeDifficulty() {
     restartButton.innerText = SMILEY_HAPPY;
     timerDisplay.innerText = "000";
     minesCountDisplay.innerText = currentDifficultySettings ? String(currentDifficultySettings.numMines).padStart(3, "0") : "000";
-    hideModal(); // Ensure modal is hidden if it was somehow visible
+    hideModal();
     clearAllPreviews();
-    chordingPreviewActiveFor = null;
     currentDifficultySettings = null;
     isFirstClick = true;
     gameOver = false;
+    boardState = []; // Clear board state
+    boardElements = []; // Clear board elements
+    boardDiv.innerHTML = ""; // Clear board visually
 }
 
 
@@ -105,13 +106,12 @@ function resetGame(difficulty) {
     minesLocation = [];
     boardElements = [];
     boardState = [];
-    chordingPreviewActiveFor = null;
 
     stopTimer();
     updateTimerDisplay();
     updateMinesCountDisplay();
     restartButton.innerText = SMILEY_HAPPY;
-    hideModal(); // Ensure modal is hidden
+    hideModal();
     clearAllPreviews();
 
     initializeBoardState();
@@ -205,25 +205,20 @@ function handleCellMouseDown(event, r, c) {
     if (gameOver || event.button !== 0) return; // Only left click affects preview
 
     const cellState = boardState[r][c];
-    const tileElement = boardElements[r][c];
 
-    if (chordingPreviewActiveFor && (chordingPreviewActiveFor.r !== r || chordingPreviewActiveFor.c !== c)) {
-         clearAllPreviews(); 
-         chordingPreviewActiveFor = null;
-    }
-
-    if (cellState.isRevealed && cellState.adjacentMines > 0) { 
-        chordingPreviewActiveFor = { r, c }; 
+    if (cellState.isRevealed && cellState.adjacentMines > 0) {
+        // Mousedown on a number: show preview on eligible neighbors
         restartButton.innerText = SMILEY_SCARED;
         const neighbors = getNeighbors(r, c);
-        neighbors.forEach(n => {
-            if (!boardState[n.r][n.c].isRevealed && !boardState[n.r][n.c].isFlagged) {
-                boardElements[n.r][n.c].classList.add('preview');
+        neighbors.forEach(n_coord => {
+            if (!boardState[n_coord.r][n_coord.c].isRevealed && !boardState[n_coord.r][n_coord.c].isFlagged) {
+                boardElements[n_coord.r][n_coord.c].classList.add('preview');
             }
         });
-    } else if (!cellState.isRevealed && !cellState.isFlagged) { 
+    } else if (!cellState.isRevealed && !cellState.isFlagged) {
+        // Mousedown on a hidden, unflagged cell
         restartButton.innerText = SMILEY_SCARED;
-        tileElement.classList.add('preview'); 
+        boardElements[r][c].classList.add('preview');
     }
 }
 
@@ -232,21 +227,31 @@ function handleGlobalMouseUp() {
         restartButton.innerText = SMILEY_HAPPY;
     }
     clearAllPreviews();
-    if (chordingPreviewActiveFor) {
-        chordingPreviewActiveFor = null;
-    }
 }
 
 function handleCellClick(r, c) {
     if (gameOver) return;
 
     const cellState = boardState[r][c];
-    const tileElement = boardElements[r][c];
+    // Previews are cleared on global mouse up.
 
     if (cellState.isRevealed && cellState.adjacentMines > 0) {
-        return; 
+        // Click on a revealed number: try to chord.
+        const neighbors = getNeighbors(r, c);
+        let adjacentFlags = 0;
+        neighbors.forEach(n => {
+            if (boardState[n.r][n.c].isFlagged) {
+                adjacentFlags++;
+            }
+        });
+
+        if (adjacentFlags === cellState.adjacentMines) {
+            chord(r, c); // Perform chording action
+        }
+        // If flags don't match, nothing happens on click of a number.
     } else if (!cellState.isRevealed && !cellState.isFlagged) {
-        tileElement.classList.remove('preview'); 
+        // Click on a hidden, unflagged cell.
+        boardElements[r][c].classList.remove('preview'); // Ensure preview is removed if this cell itself was clicked
 
         if (isFirstClick) {
             placeMines(r, c);
@@ -256,8 +261,8 @@ function handleCellClick(r, c) {
 
         if (cellState.isMine) {
             revealCell(r, c); 
-            boardElements[r][c].classList.add('mine-hit'); 
-            endGame(false); 
+            boardElements[r][c].classList.add('mine-hit');
+            endGame(false);
             return;
         }
         revealCellRecursive(r, c);
@@ -267,7 +272,7 @@ function handleCellClick(r, c) {
         }
     }
     
-    if (!gameOver && restartButton.innerText !== SMILEY_WON && restartButton.innerText !== SMILEY_LOST ) {
+    if (!gameOver && ![SMILEY_WON, SMILEY_LOST].includes(restartButton.innerText) ) {
          restartButton.innerText = SMILEY_HAPPY;
     }
 }
@@ -282,6 +287,7 @@ function handleCellRightClick(event, r, c) {
     boardState[r][c].isFlagged = !boardState[r][c].isFlagged;
     if (boardState[r][c].isFlagged) {
         boardElements[r][c].innerText = "🚩";
+        boardElements[r][c].classList.remove('preview'); // Cannot preview a flagged cell
         flagsPlaced++;
     } else {
         boardElements[r][c].innerText = "";
@@ -291,6 +297,7 @@ function handleCellRightClick(event, r, c) {
 }
 
 function revealCell(r, c) {
+    // Returns 1 if a non-mine cell was newly revealed, 0 otherwise.
     if (!isValid(r,c) || boardState[r][c].isRevealed || boardState[r][c].isFlagged) return 0;
 
     boardState[r][c].isRevealed = true;
@@ -320,11 +327,9 @@ function revealCellRecursive(r, c) {
         return;
     }
 
-    if(revealCell(r,c) === 0 && boardState[r][c].adjacentMines > 0) { 
-        return;
-    }
+    const cellRevealedResult = revealCell(r,c);
     
-    if (boardState[r][c].adjacentMines === 0) { 
+    if (cellRevealedResult === 1 && boardState[r][c].adjacentMines === 0) { 
         getNeighbors(r,c).forEach(n => revealCellRecursive(n.r, n.c));
     }
 }
@@ -336,11 +341,12 @@ function chord(r, c) {
     let hitMineInChord = false;
 
     for (const n of neighbors) {
-        if (!boardState[n.r][n.c].isRevealed && !boardState[n.r][n.c].isFlagged) {
-            if (boardState[n.r][n.c].isMine) {
+        const neighborState = boardState[n.r][n.c];
+        if (!neighborState.isRevealed && !neighborState.isFlagged) {
+            if (neighborState.isMine) {
                 hitMineInChord = true;
                 revealCell(n.r, n.c); 
-                boardElements[n.r][n.c].classList.add('mine-hit'); 
+                boardElements[n.r][n.c].classList.add('mine-hit');
                 break; 
             } else {
                 revealCellRecursive(n.r, n.c);
@@ -354,6 +360,9 @@ function chord(r, c) {
         if (checkWinCondition()) { 
             endGame(true);
         }
+    }
+     if (!gameOver && ![SMILEY_WON, SMILEY_LOST].includes(restartButton.innerText) ) {
+         restartButton.innerText = SMILEY_HAPPY;
     }
 }
 
@@ -387,15 +396,14 @@ function endGame(isWin) {
     stopTimer();
     revealAllMines(isWin); 
     clearAllPreviews(); 
-    chordingPreviewActiveFor = null;
 
     if (isWin) {
         restartButton.innerText = SMILEY_WON;
-        // showModal("You Win!", "Congratulations, you cleared all mines!"); // Removed
+        // showModal("You Win!", "Congratulations, you cleared all mines!"); // Removed modal
         minesCountDisplay.innerText = String(0).padStart(3, "0"); 
     } else {
         restartButton.innerText = SMILEY_LOST;
-        // showModal("Game Over!", "Boom! You hit a mine."); // Removed
+        // showModal("Game Over!", "Boom! You hit a mine."); // Removed modal
     }
 }
 
@@ -407,19 +415,14 @@ function revealAllMines(isWin) {
             tileElement.classList.remove('preview'); 
             
             if (cellState.isRevealed && cellState.isMine && tileElement.classList.contains('mine-hit')) {
-                // Already handled: the mine that was hit explicitly.
+                 tileElement.innerText = "💣"; 
             } else if (cellState.isMine) {
                 tileElement.classList.remove("tile-hidden");
                 tileElement.classList.add("tile-revealed");
                 if (isWin) { 
-                    if(!cellState.isFlagged) tileElement.innerText = "💣"; 
-                    else tileElement.innerText = "🚩";
+                    tileElement.innerText = cellState.isFlagged ? "🚩" : "💣"; 
                 } else { 
-                    if (cellState.isFlagged) { 
-                        tileElement.innerText = "🚩"; 
-                    } else { 
-                        tileElement.innerText = "💣";
-                    }
+                    tileElement.innerText = cellState.isFlagged ? "🚩" : "💣";
                 }
             } else if (cellState.isFlagged && !cellState.isMine) { 
                 if (!isWin) { 
@@ -466,15 +469,12 @@ function updateMinesCountDisplay() {
 }
 
 function showModal(title, message) {
-    // This function is no longer called for game end, but kept for potential other uses.
-    // If it were to be used, ensure modal HTML elements still exist.
     modalTitle.innerText = title;
     modalMessage.innerText = message;
     modalDiv.style.display = "flex";
 }
 
 function hideModal() {
-    // This function is still used when changing difficulty to ensure it's hidden.
     modalDiv.style.display = "none";
 }
 
